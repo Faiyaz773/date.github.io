@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>To-Do List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --primary-color: #434849;
+      --secondary-color: #ff5252;
+      --text-color: #eeeeee;
+      --input-bg: #2c2c2c;
+      --accent: #4fc3f7;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      margin: 0;
+      padding: 20px;
+      color: var(--text-color);
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 30px;
+      font-size: 2em;
+      color: var(--accent);
+      text-shadow: 0 0 5px rgba(79, 195, 247, 0.7);
+    }
+
+    .tasks {
+      max-width: 600px;
+      background: var(--card-bg);
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-group input[type="text"],
+    .input-group input[type="date"],
+    .input-group button {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .tasks ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .tasks li {
+      background: #2a2a2a;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .tasks li:hover {
+      background: #323232;
+      transform: scale(1.02);
+    }
+
+    input[type="text"], input[type="date"] {
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid #3c3c3c;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 1em;
+      transition: border-color 0.2s ease;
+    }
+
+    input[type="text"]::placeholder {
+      color: #aaa;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      padding: 12px 15px;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      background: var(--accent);
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(79, 195, 247, 0.4);
+    }
+
+    .tasks button.delete {
+      background: var(--secondary-color);
+      width: auto;
+      margin-left: 10px;
+      font-size: 0.9em;
+    }
+
+    .tasks button.delete:hover {
+      background: #d50000;
+    }
+
+    strong {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+
+    @media(max-width: 600px) {
+      .input-group {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📋 To-Do List</h1>
+
+  <div class="tasks">
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Enter your task...">
+      <input type="date" id="datePicker">
+      <button onclick="addTask()">Add Task</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function addTask() {
+      const taskInput = document.getElementById('taskInput');
+      const datePicker = document.getElementById('datePicker');
+
+      const taskText = taskInput.value.trim();
+      const taskDate = datePicker.value;
+
+      if (taskText === '' || taskDate === '') {
+        alert('Please enter both task and date.');
+        return;
+      }
+
+      const task = { text: taskText, date: taskDate };
+      tasks.push(task);
+
+      taskInput.value = '';
+      datePicker.value = '';
+
+      saveTasks();
+      showTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      saveTasks();
+      showTasks();
+    }
+
+    function showTasks() {
+      tasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div style="flex:1;">
+            <strong>${task.date}</strong><br>
+            ${task.text}
+          </div>
+        `;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('delete');
+        deleteBtn.onclick = () => deleteTask(index);
+
+        li.appendChild(deleteBtn);
+        taskList.appendChild(li);
+      });
+
+      saveTasks();
+    }
+
+    showTasks();
+  </script>
+
+</body>
+</html>
